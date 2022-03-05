@@ -1,56 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <style>
-        html,
-        body {
-            margin: 0;
-            background-color: black;
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        #glcanvas {
-            top: 0;
-            width: 100%;
-            height: 100%;
-        }
-    </style>
-    <script src="lib/three.js" defer></script>
-    <script src="lib/OrbitControls.js" defer></script>
-    <script src="lib/gl-matrix-min.js" defer></script>
-    <script type="text/javascript" src="lib/MTLLoader.js" defer></script>
-    <script type="text/javascript" src="lib/OBJLoader.js" defer></script>
-    <script type="text/javascript" src="lib/dat.gui.js" defer></script>
-
-    <script src="src/shaders/Shader.js" defer></script>
-    <script src="src/shaders/InternalShader.js" defer></script>
-
-    <script src="src/materials/Material.js" defer></script>
-    <script src="src/materials/ShadowMaterial.js" defer></script>
-    <script src="src/materials/PhongMaterial.js" defer></script>
-
-    <script src="src/textures/Texture.js" defer></script>
-    <script src="src/textures/FBO.js" defer></script>
-
-    <script src="src/objects/Mesh.js" defer></script>
-    <script src="src/loads/loadOBJ.js" defer></script>
-    <script src="src/loads/loadShader.js" defer></script>
-
-    <script src="src/lights/Light.js" defer></script>
-    <script src="src/lights/DirectionalLight.js" defer></script>
-    <script src="src/lights/PointLight.js" defer></script>
-
-    <script src="src/renderers/WebGLRenderer.js" defer></script>
-    <script src="src/renderers/MeshRender.js" defer></script>
-    <script src="src/engine.js" defer></script>
+  <meta charset="UTF-8">
+  <title>Demo</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+  <script src="lib/three.js"></script>
+  <script src="src/customObj.js"></script>
+  <script src="src/engine.js"></script>
 </head>
 
 <body>
-    <canvas id="glcanvas"></canvas>
+  <script>
 
+    var scene = new THREE.Scene();
+
+    var halfBandWidth = 1.4;
+    var verticalwidth = 8.0;
+    var flagLength = 1.4;
+    const colorMaterial = new THREE.LineBasicMaterial( { color: 0x808080 } );
+    const texJapan = new THREE.TextureLoader().load( 'assets/flags/Japan.png' );
+    const colorMeshMaterial = new THREE.MeshBasicMaterial({color: 0x808080, side: THREE.DoubleSide, wireframe:false, map:texJapan});
+
+    //Add Scene
+    {
+      const L3Line = new VerticalLine(halfBandWidth * 5, colorMaterial);
+      const L2Line = new VerticalLine(halfBandWidth * 3, colorMaterial);
+      const L1Line = new VerticalLine(halfBandWidth, colorMaterial);
+      const R1Line = new VerticalLine(-halfBandWidth, colorMaterial);
+      const R2Line = new VerticalLine(-halfBandWidth * 3, colorMaterial);
+      const R3Line = new VerticalLine(-halfBandWidth * 5, colorMaterial);
+      const H1Line = new HorizontalLine(0.0, halfBandWidth * 10, colorMaterial);
+      const H2Line = new HorizontalLine(verticalwidth, halfBandWidth * 10, colorMaterial);
+      const H3Line = new HorizontalLine(verticalwidth * 2, halfBandWidth * 10, colorMaterial);
+      const H4Line = new HorizontalLine(verticalwidth * 3, halfBandWidth * 10, colorMaterial);
+      scene.add(L3Line.getGeo());
+      scene.add(L2Line.getGeo());
+      scene.add(L1Line.getGeo());
+      scene.add(R1Line.getGeo());
+      scene.add(R2Line.getGeo());
+      scene.add(R3Line.getGeo());
+      scene.add(H1Line.getGeo());
+      scene.add(H2Line.getGeo());
+      scene.add(H3Line.getGeo());
+      scene.add(H4Line.getGeo());
+    }
+
+    //Add Flags
+    {
+      var myPlane = new THREE.PlaneGeometry(halfBandWidth, halfBandWidth);
+      var planeMesh = new THREE.Mesh(myPlane, colorMeshMaterial);
+      planeMesh.position.z = 10; 
+      planeMesh.position.x = 0;
+      planeMesh.position.y = 2;
+      scene.add(planeMesh);
+
+
+    }
+
+
+
+    var width = window.innerWidth; //窗口宽度
+    var height = window.innerHeight; //窗口高度
+    var k = width / height; //窗口宽高比
+    var s = 36; //三维场景显示范围控制系数，系数越大，显示的范围越大
+  
+    //Camera
+    var camera = new THREE.PerspectiveCamera(45, k, 1, 100);
+    camera.position.set(0, 10, -15); //设置相机位置
+    camera.lookAt(0, 2, 2); //设置相机方向(指向的场景对象)
+
+    //Renderer
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize(width, height);
+    renderer.setClearColor(0x120205, 1);
+    document.body.appendChild(renderer.domElement);
+
+    var update = function(){
+
+    };
+    var render = function(){
+      renderer.render(scene, camera);
+
+    };
+    var GameLoop = function(){
+      requestAnimationFrame(GameLoop);
+      update();
+      render();
+    };
+    GameLoop();
+
+  </script>
 </body>
-
 </html>
