@@ -19,13 +19,16 @@
   <script>
 
     var scene = new THREE.Scene();
-
+    var clock = new THREE.Clock();
     var halfBandWidth = 1.4;
     var verticalwidth = 8.0;
     var flagLength = 1.4;
+    var startYear = 1980;
+    var currentYear = 1980;
+    var frequency = 0.25; // 1/4 year per second - one vertical width
+    var speed = verticalwidth * frequency;
+
     const colorMaterial = new THREE.LineBasicMaterial( { color: 0x808080 } );
-    const texJapan = new THREE.TextureLoader().load( 'assets/flags/Japan.png' );
-    const colorMeshMaterial = new THREE.MeshBasicMaterial({color: 0x808080, side: THREE.DoubleSide, wireframe:false, map:texJapan});
 
     //Add Scene
     {
@@ -53,23 +56,16 @@
 
     //Add Flags
     {
-      var myPlane = new THREE.PlaneGeometry(halfBandWidth, halfBandWidth);
-      var planeMesh = new THREE.Mesh(myPlane, colorMeshMaterial);
-      planeMesh.position.z = 10; 
-      planeMesh.position.x = 0;
-      planeMesh.position.y = 2;
-      scene.add(planeMesh);
-
-
+      var Japan = new CountryFlag('Japan');
+      scene.add(Japan.createMesh());
+      
     }
 
-
-
-    var width = window.innerWidth; //窗口宽度
-    var height = window.innerHeight; //窗口高度
-    var k = width / height; //窗口宽高比
-    var s = 36; //三维场景显示范围控制系数，系数越大，显示的范围越大
-  
+    //canvas
+    var width = window.innerWidth; 
+    var height = window.innerHeight;
+    var k = width / height;
+    var s = 36;
     //Camera
     var camera = new THREE.PerspectiveCamera(45, k, 1, 100);
     camera.position.set(0, 10, -15); //设置相机位置
@@ -82,12 +78,14 @@
     document.body.appendChild(renderer.domElement);
 
     var update = function(){
-
+      camera.position.z += speed * clock.getDelta();
+      camera.lookAt(0, 2, camera.position.z + 17);
     };
+
     var render = function(){
       renderer.render(scene, camera);
-
     };
+
     var GameLoop = function(){
       requestAnimationFrame(GameLoop);
       update();

@@ -30,18 +30,40 @@ class HorizontalLine{
     }
 }
 
-class FlagQuad{
+class CountryFlag{
+    constructor(country){
+        this.length = 1.4;
+        this.texture = new THREE.TextureLoader().load( 'assets/flags/' + country + '.png' );
+        this.material = new THREE.MeshBasicMaterial({color: 0xffffff, side: THREE.DoubleSide, map: this.texture, transparent:true, opacity : 1.0});
+        this.planeGeo = new THREE.PlaneGeometry(this.length, this.length);
 
-    constructor(xAxis, zAxis, material, length){
-        this.geometry = new THREE.BufferGeometry();
-        const vertices = new Float32Array([
-            xAxis + length/2, 0, zAxis,
-            xAxis - length/2, 0, zAxis,
-            xAxis - length/2, length, zAxis,
-            xAxis - length/2, length, zAxis
-        ]);
-        this.geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-        this.mesh = new THREE.Mesh(this.geometry, material);
+    }
+    createMesh(){
+        return new THREE.Mesh(this.planeGeo, this.material);
+    }
+} 
 
+class PathNode{
+    constructor(rank, year, country){
+        
+        this.rank = rank;
+        this.year = year;
+        this.country = country;
+    }
+}
+
+class YearData{
+    constructor(){
+        this.rawData = [
+            "Japan", "Japan", "Japan", "Japan", "Japan",
+            "Japan", "Japan", "Japan", "Japan", "Japan",
+            "Japan", "Japan", "Japan", "Japan", "Japan",
+            "Japan", "Japan", "Japan", "Japan", "Japan",
+            "Japan", "Japan", "Japan", "Japan", "Japan",
+        ];
+        this.startYear = 1980;
+    }
+    getYearRank(year, rank){
+        return this.rawData(5 * (year- this.startYear)/4 + rank - 1);
     }
 }
