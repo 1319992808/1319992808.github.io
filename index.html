@@ -23,14 +23,14 @@
     var halfBandWidth = 1.4;
     var verticalwidth = 8.0;
     var flagLength = 1.4;
-    var startYear = 1980;
+    var startYear = 1980; 
     var currentYear = 1980;
     var frequency = 0.25; // 1/4 year per second - one vertical width
     var speed = verticalwidth * frequency;
-
+    const table = new YearData();
     const colorMaterial = new THREE.LineBasicMaterial( { color: 0x808080 } );
 
-    //Add Scene
+    //Add Grid
     {
       const L3Line = new VerticalLine(halfBandWidth * 5, colorMaterial);
       const L2Line = new VerticalLine(halfBandWidth * 3, colorMaterial);
@@ -54,14 +54,50 @@
       scene.add(H4Line.getGeo());
     }
 
-    //Add Flags
-    {
-      var Japan = new CountryFlag('Japan');
-      scene.add(Japan.createMesh());
-      
+    // //Scene Generator
+    // {
+    //   var pre = ['','','','',''];
+    //   var curr = ['','','','',''];
+    //   for(i = 1980; i < 2000; i+=4){
+    //     for(j = 1; j <= 5; ++j){
+    //       //Create a mesh here
+    //       var countryName = table.getYearRank(i,j);
+    //       var countryFlag = new CountryFlag(countryName);
+    //       curr[j-1] = countryName;
+    //       var isReign = false;
+    //       for(k = 0; k < 5; k++){
+    //         if(pre[k] == countryName){
+    //           isReign = true;
+    //           break;
+    //         }
+    //       }
+    //       if(!isReign){
+    //         var mesh = countryFlag.createMesh();
+    //         mesh.position.set(-2 * (j-3) * halfBandWidth, flagLength/2, (i-1980)/4 * verticalwidth);
+    //         scene.add(mesh);
+    //       }else{
+    //         var mesh = new ConnectedLine(-2 * (j-3) * halfBandWidth, (i-1980)/4 * verticalwidth, ).getGeo();
+    //       }         
+    //     }
+    //     pre = curr;
+    //   }
+    // }
+
+    const flagMesh = new Map();
+    const countries = ['Japan', 'China', 'Canada', 'Korea', 'America'];
+    countries.forEach(function(countryName){
+      flagMesh.set(countryName, new CountryFlag(countryName));
+    });
+    var nodeMap = new Array();
+    for(i = 1980; i < 2000; i+=4){
+      var indexYear = (i - 1980)/4;
+      nodeMap[indexYear] = new Array(indexYear);
+      for(j = 1; j <= 5; ++j){
+        nodeMap[indexYear][j-1] = new PathNode(j, i, table.getYearRank(i, j));
+      }
     }
 
-    //canvas
+    //canvas  
     var width = window.innerWidth; 
     var height = window.innerHeight;
     var k = width / height;
@@ -76,14 +112,43 @@
     renderer.setSize(width, height);
     renderer.setClearColor(0x120205, 1);
     document.body.appendChild(renderer.domElement);
+    
+    var frontFive = new Array(5);
+    function updateFrontFive(z){
+      //Front Five
+      var lerpWeight = (z % verticalwidth) / 7.0;
+      var indexYear = parseInt(z / verticalwidth);
+      for(i = 0; i <5;i++){
+        var node = nodeMap[indexYear][i];
+        var isReign = false;
+        for(j = 0; j <5; j++){
+          if(node.country == nodeMap[indexYear+1][j].country){
+            isReign = true;
+            frontFive[i] = flagMesh.get(node.country).createMesh();
+            var positionX = (1 - lerpWeight) * node.x + lerpWeight *  nodeMap[indexYear+1][j].x;
+            frontFive[i].position.set(positionX, 0.7, z);
+            scene.add(frontFive[i]);
+          }
+        }
+        if(!isReign){
+
+        }
+      }
+    }
 
     var update = function(){
       camera.position.z += speed * clock.getDelta();
       camera.lookAt(0, 2, camera.position.z + 17);
+      updateFrontFive(camera.position.z + 15);
+      //Front Five
+      
     };
 
     var render = function(){
       renderer.render(scene, camera);
+      for(i = 0; i < 5; i++){
+        scene.remove(frontFive[i]);
+      }
     };
 
     var GameLoop = function(){
