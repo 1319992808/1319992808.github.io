@@ -32,68 +32,53 @@
 
     //Add Grid
     {
-      const L3Line = new VerticalLine(halfBandWidth * 5, colorMaterial);
-      const L2Line = new VerticalLine(halfBandWidth * 3, colorMaterial);
-      const L1Line = new VerticalLine(halfBandWidth, colorMaterial);
-      const R1Line = new VerticalLine(-halfBandWidth, colorMaterial);
-      const R2Line = new VerticalLine(-halfBandWidth * 3, colorMaterial);
-      const R3Line = new VerticalLine(-halfBandWidth * 5, colorMaterial);
-      const H1Line = new HorizontalLine(0.0, halfBandWidth * 10, colorMaterial);
-      const H2Line = new HorizontalLine(verticalwidth, halfBandWidth * 10, colorMaterial);
-      const H3Line = new HorizontalLine(verticalwidth * 2, halfBandWidth * 10, colorMaterial);
-      const H4Line = new HorizontalLine(verticalwidth * 3, halfBandWidth * 10, colorMaterial);
-      scene.add(L3Line.getGeo());
-      scene.add(L2Line.getGeo());
-      scene.add(L1Line.getGeo());
-      scene.add(R1Line.getGeo());
-      scene.add(R2Line.getGeo());
-      scene.add(R3Line.getGeo());
-      scene.add(H1Line.getGeo());
-      scene.add(H2Line.getGeo());
-      scene.add(H3Line.getGeo());
-      scene.add(H4Line.getGeo());
+      for(i = -5; i <= 5; i+=2){
+        scene.add((new VerticalLine(halfBandWidth * i, colorMaterial)).getGeo());
+      }
+      for(i = 0; i <= 20;i++){
+       scene.add((new HorizontalLine(verticalwidth * i, halfBandWidth *10, colorMaterial)).getGeo());
+      }
     }
 
-    // //Scene Generator
-    // {
-    //   var pre = ['','','','',''];
-    //   var curr = ['','','','',''];
-    //   for(i = 1980; i < 2000; i+=4){
-    //     for(j = 1; j <= 5; ++j){
-    //       //Create a mesh here
-    //       var countryName = table.getYearRank(i,j);
-    //       var countryFlag = new CountryFlag(countryName);
-    //       curr[j-1] = countryName;
-    //       var isReign = false;
-    //       for(k = 0; k < 5; k++){
-    //         if(pre[k] == countryName){
-    //           isReign = true;
-    //           break;
-    //         }
-    //       }
-    //       if(!isReign){
-    //         var mesh = countryFlag.createMesh();
-    //         mesh.position.set(-2 * (j-3) * halfBandWidth, flagLength/2, (i-1980)/4 * verticalwidth);
-    //         scene.add(mesh);
-    //       }else{
-    //         var mesh = new ConnectedLine(-2 * (j-3) * halfBandWidth, (i-1980)/4 * verticalwidth, ).getGeo();
-    //       }         
-    //     }
-    //     pre = curr;
-    //   }
-    // }
-
     const flagMesh = new Map();
-    const countries = ['Japan', 'China', 'Canada', 'Korea', 'America'];
+    const countries = ['SovietUnion','DDR', 'Bulgaria', 'Cuba', 'Italy', 'America', 
+    'Romania', 'Germany', 'CIS', 'France', 'Austrilia', 'UK','Japan', 'China', 
+    'Canada', 'Korea', 'America', 'Russia', 'ROT'];
     countries.forEach(function(countryName){
       flagMesh.set(countryName, new CountryFlag(countryName));
     });
     var nodeMap = new Array();
-    for(i = 1980; i < 2000; i+=4){
+    for(i = 1980; i <= 2020; i+=4){
       var indexYear = (i - 1980)/4;
-      nodeMap[indexYear] = new Array(indexYear);
+      nodeMap[indexYear] = new Array(5);
       for(j = 1; j <= 5; ++j){
         nodeMap[indexYear][j-1] = new PathNode(j, i, table.getYearRank(i, j));
+      }
+    }
+
+    //Static mesh
+    for(i = 0; i <= 10; i++){
+      for(j = 0;j < 5;j++){
+        var node = nodeMap[i][j];
+        var isReign = false;
+        var prevPosX, prevPosZ;
+        if(i>0){
+          for(k=0; k < 5;k++){
+            if(nodeMap[i-1][k].country == node.country){
+              isReign = true;
+              prevPosX = nodeMap[i-1][k].x;
+              prevPosZ = nodeMap[i-1][k].z;
+              break;
+            }
+          }
+        }
+        if(!isReign){
+          node.mesh = flagMesh.get(node.country).createMesh();
+          node.mesh.position.set(node.x, node.y, node.z);
+        }else{
+          node.mesh = (new ConnectedLine(node.x, node.z, prevPosX, prevPosZ, colorMaterial)).getGeo();          
+        }
+        scene.add(node.mesh);
       }
     }
 
@@ -101,7 +86,6 @@
     var width = window.innerWidth; 
     var height = window.innerHeight;
     var k = width / height;
-    var s = 36;
     //Camera
     var camera = new THREE.PerspectiveCamera(45, k, 1, 100);
     camera.position.set(0, 10, -15); //设置相机位置
@@ -116,31 +100,37 @@
     var frontFive = new Array(5);
     function updateFrontFive(z){
       //Front Five
-      var lerpWeight = (z % verticalwidth) / 7.0;
+      var lerpWeight = Math.min((z % verticalwidth) / 7.0, 1.0);
       var indexYear = parseInt(z / verticalwidth);
-      for(i = 0; i <5;i++){
+      for(i = 0; i < 5;i++){
         var node = nodeMap[indexYear][i];
+        node.mesh.visible = false;
         var isReign = false;
-        for(j = 0; j <5; j++){
+        var positionX;
+        for(j = 0; j < 5; j++){
           if(node.country == nodeMap[indexYear+1][j].country){
             isReign = true;
             frontFive[i] = flagMesh.get(node.country).createMesh();
-            var positionX = (1 - lerpWeight) * node.x + lerpWeight *  nodeMap[indexYear+1][j].x;
+            positionX = (1 - lerpWeight) * node.x + lerpWeight *  nodeMap[indexYear+1][j].x;
             frontFive[i].position.set(positionX, 0.7, z);
             scene.add(frontFive[i]);
+            break;
           }
         }
         if(!isReign){
-
+            positionX = node.x;
+            frontFive[i] = flagMesh.get(node.country).createMesh();
+            frontFive[i].position.set(positionX, 0.7, z);
         }
+        scene.add(frontFive[i]);
       }
+
     }
 
     var update = function(){
       camera.position.z += speed * clock.getDelta();
       camera.lookAt(0, 2, camera.position.z + 17);
       updateFrontFive(camera.position.z + 15);
-      //Front Five
       
     };
 
