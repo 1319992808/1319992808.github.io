@@ -30,13 +30,13 @@
     const table = new YearData();
     const colorMaterial = new THREE.LineBasicMaterial( { color: 0x808080 } );
 
+    var verticalLine = new Array(6);
+    var horizontalLine = new Array(20);
     //Add Grid
     {
-      for(i = -5; i <= 5; i+=2){
-        scene.add((new VerticalLine(halfBandWidth * i, colorMaterial)).getGeo());
-      }
       for(i = 0; i <= 20;i++){
-       scene.add((new HorizontalLine(verticalwidth * i, halfBandWidth *10, colorMaterial)).getGeo());
+       horizontalLine[i] = (new HorizontalLine(verticalwidth * i, halfBandWidth *10, colorMaterial)).getGeo();
+       scene.add(horizontalLine[i]);
       }
     }
 
@@ -105,6 +105,7 @@
       for(i = 0; i < 5;i++){
         var node = nodeMap[indexYear][i];
         node.mesh.visible = false;
+        horizontalLine[indexYear].visible = false;
         var isReign = false;
         var positionX;
         for(j = 0; j < 5; j++){
@@ -114,23 +115,33 @@
             positionX = (1 - lerpWeight) * node.x + lerpWeight *  nodeMap[indexYear+1][j].x;
             frontFive[i].position.set(positionX, 0.7, z);
             scene.add(frontFive[i]);
+            //Change connected line
+            scene.remove(nodeMap[indexYear+1][j].mesh);
+            nodeMap[indexYear+1][j].mesh = (new ConnectedLine(positionX,z, nodeMap[indexYear+1][j].x, nodeMap[indexYear+1][j].z, colorMaterial)).getGeo();
+            scene.add(nodeMap[indexYear+1][j].mesh);
             break;
           }
         }
         if(!isReign){
             positionX = node.x;
-            frontFive[i] = flagMesh.get(node.country).createMesh();
+            frontFive[i] = flagMesh.get(node.country).createMesh(1 - lerpWeight);
             frontFive[i].position.set(positionX, 0.7, z);
         }
         scene.add(frontFive[i]);
       }
-
     }
 
+    function updateUI(position){
+      for(i = -5; i <= 5; i+=2){
+        verticalLine[(i+5)/2] = new VerticalLine(position, halfBandWidth * i, colorMaterial).getGeo();
+        scene.add(verticalLine[(i+5)/2]);
+      }
+    }
     var update = function(){
       camera.position.z += speed * clock.getDelta();
       camera.lookAt(0, 2, camera.position.z + 17);
       updateFrontFive(camera.position.z + 15);
+      updateUI(camera.position.z + 15);
       
     };
 
@@ -138,6 +149,9 @@
       renderer.render(scene, camera);
       for(i = 0; i < 5; i++){
         scene.remove(frontFive[i]);
+      }
+      for(i = 0; i < 6; i++){
+        scene.remove(verticalLine[i]);
       }
     };
 

@@ -1,11 +1,11 @@
 class VerticalLine{
     
-    constructor(xAxis, material){
+    constructor(zAxis, xAxis, material){
         this.x = xAxis;
         this.material = material;
         this.points = [];
-        this.points.push(new THREE.Vector3(this.x, 0, 0));
-        this.points.push(new THREE.Vector3(this.x, 0, 100));
+        this.points.push(new THREE.Vector3(this.x, 0, zAxis));
+        this.points.push(new THREE.Vector3(this.x, 0, zAxis + 100));
         this.geometry = new THREE.BufferGeometry().setFromPoints(this.points);
         this.line = new THREE.Line(this.geometry, material);
     }
@@ -49,6 +49,10 @@ class CountryFlag{
         this.planeGeo = new THREE.PlaneGeometry(this.length, this.length);
     }
     createMesh(){
+        return new THREE.Mesh(this.planeGeo, this.material);
+    }
+    createMesh(transparency){
+        this.material = new THREE.MeshBasicMaterial({color: 0xffffff, side: THREE.DoubleSide, map: this.texture, transparent:true, opacity : transparency});
         return new THREE.Mesh(this.planeGeo, this.material);
     }
 } 
