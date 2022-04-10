@@ -10,6 +10,19 @@
     font-weight: bold;
     text-align: center;
 }
+
+#year{
+    position: absolute;
+    color: azure;
+    width: 20%;
+    top: 72%;
+    left: 15%;
+    font-size: x-large;
+    font-weight: bold;
+    font-family: 'Courier New', Courier, monospace;
+    z-index:100;
+}
+
 #rank1{
     position: relative;
     color:#fcfbbc;
@@ -63,3 +76,4 @@
     right:10%;
     z-index:100;
 }
+

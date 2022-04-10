@@ -43,6 +43,7 @@
     <div id="rank5">5</div>
   </div>
   <div id = "year">1980</div>
+
   <div id = "audio">
     <audio autoplay controls>
       <source src="assets/Olympics.mp3">
@@ -144,6 +145,7 @@
       //Front Five
       var lerpWeight = Math.min((z % verticalwidth) / 7.0, 1.0);
       var indexYear = parseInt(z / verticalwidth);
+      document.getElementById("year").textContent = startYear + indexYear * 4;
       for(i = 0; i < 5;i++){
         var node = nodeMap[indexYear][i];
         node.mesh.visible = false;
