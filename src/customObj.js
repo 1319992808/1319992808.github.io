@@ -31,10 +31,30 @@ class HorizontalLine{
 }
 class ConnectedLine{
     constructor(x1, z1, x2, z2, material){
+        const rankColors = [
+            {r: 0.443, g: 0.35, b:0.556},
+            {r: 133.0/255, g: 44.0/255, b:130.0/255},
+            {r: 181.0/255, g: 47.0/255, b:89.0/255},
+            {r: 245.0/255, g: 175.0/255, b:113.0/255},
+            {r: 252.0/255, g: 251.0/255, b:188.0/255},
+            
+        ];
+
+        var indexX1 = parseInt(x1/2.8) + 2;
+        var indexX2 = parseInt(x2/2.8) + 2;
+        const colors = new Float32Array([
+            rankColors[indexX1].r, rankColors[indexX1].g, rankColors[indexX1].b,
+            rankColors[indexX2].r, rankColors[indexX2].g, rankColors[indexX2].b
+        ]);
+        
         this.points = [];
         this.points.push(new THREE.Vector3(x1, 0, z1));
         this.points.push(new THREE.Vector3(x2, 0, z2));
         this.geometry = new THREE.BufferGeometry().setFromPoints(this.points);
+        this.geometry.addAttribute(
+            'color',
+            new THREE.BufferAttribute(new Float32Array(colors), 3)
+        );
         this.line = new THREE.Line(this.geometry, material);
     }
     getGeo(){
@@ -45,13 +65,10 @@ class CountryFlag{
     constructor(country){
         this.length = 1.4;
         this.texture = new THREE.TextureLoader().load( 'assets/flags/' + country + '.png' );
-        this.material = new THREE.MeshBasicMaterial({color: 0xffffff, side: THREE.DoubleSide, map: this.texture, transparent:true, opacity : 1.0});
         this.planeGeo = new THREE.PlaneGeometry(this.length, this.length);
     }
-    createMesh(){
-        return new THREE.Mesh(this.planeGeo, this.material);
-    }
     createMesh(transparency){
+        transparency = (typeof transparency !== 'undefined') ? transparency : 1.0;
         this.material = new THREE.MeshBasicMaterial({color: 0xffffff, side: THREE.DoubleSide, map: this.texture, transparent:true, opacity : transparency});
         return new THREE.Mesh(this.planeGeo, this.material);
     }

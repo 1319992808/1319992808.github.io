@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Demo</title>
+  <link rel="stylesheet" href="assets/styles.css">
   <style>
     body {
       margin: 0;
@@ -12,10 +13,44 @@
   </style>
   <script src="lib/three.js"></script>
   <script src="src/customObj.js"></script>
-  <script src="src/engine.js"></script>
+  
+  <script type = "shader/line-vertex" id="vertexShader">
+
+    attribute vec3 color;
+    varying vec3 vColor;
+    void main()
+    {
+       vColor = color;
+       gl_Position =  projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  </script>
+  <script type = "shader/line-fragment" id="fragmentShader">
+    varying vec3 vColor;
+    void main()
+    {
+       gl_FragColor = vec4(vColor, 1.0);
+    }
+  </script>
+
 </head>
 
 <body>
+  <div id = "rank">
+    <div id="rank1">1</div>
+    <div id="rank2">2</div>
+    <div id="rank3">3</div>
+    <div id="rank4">4</div>
+    <div id="rank5">5</div>
+  </div>
+
+  <div id = "audio">
+    <audio autoplay controls>
+      <source src="assets/Olympics.mp3">
+      Your browser does not support the audio element.
+    </audio>
+  </div>
+  
+
   <script>
 
     var scene = new THREE.Scene();
@@ -28,18 +63,24 @@
     var frequency = 0.25; // 1/4 year per second - one vertical width
     var speed = verticalwidth * frequency;
     const table = new YearData();
-    const colorMaterial = new THREE.LineBasicMaterial( { color: 0x808080 } );
+    
+    const gridMaterial = new THREE.LineBasicMaterial( { color: 0x303030 } );
+    const lineMaterial = new THREE.ShaderMaterial({
+      vertexShader: document.getElementById('vertexShader').textContent,
+      fragmentShader: document.getElementById('fragmentShader').textContent,
+    });
 
     var verticalLine = new Array(6);
     var horizontalLine = new Array(20);
     //Add Grid
     {
       for(i = 0; i <= 20;i++){
-       horizontalLine[i] = (new HorizontalLine(verticalwidth * i, halfBandWidth *10, colorMaterial)).getGeo();
+       horizontalLine[i] = (new HorizontalLine(verticalwidth * i, halfBandWidth *10, gridMaterial)).getGeo();
        scene.add(horizontalLine[i]);
       }
     }
-
+    
+   
     const flagMesh = new Map();
     const countries = ['SovietUnion','DDR', 'Bulgaria', 'Cuba', 'Italy', 'America', 
     'Romania', 'Germany', 'CIS', 'France', 'Austrilia', 'UK','Japan', 'China', 
@@ -76,7 +117,7 @@
           node.mesh = flagMesh.get(node.country).createMesh();
           node.mesh.position.set(node.x, node.y, node.z);
         }else{
-          node.mesh = (new ConnectedLine(node.x, node.z, prevPosX, prevPosZ, colorMaterial)).getGeo();          
+          node.mesh = (new ConnectedLine(node.x, node.z, prevPosX, prevPosZ, lineMaterial)).getGeo();          
         }
         scene.add(node.mesh);
       }
@@ -87,9 +128,9 @@
     var height = window.innerHeight;
     var k = width / height;
     //Camera
-    var camera = new THREE.PerspectiveCamera(45, k, 1, 100);
-    camera.position.set(0, 10, -15); //设置相机位置
-    camera.lookAt(0, 2, 2); //设置相机方向(指向的场景对象)
+    var camera = new THREE.PerspectiveCamera(50, k, 1, 100);
+    camera.position.set(0, 6, -15); //设置相机位置
+    camera.lookAt(0, 4, 2); //设置相机方向(指向的场景对象)
 
     //Renderer
     var renderer = new THREE.WebGLRenderer();
@@ -117,7 +158,7 @@
             scene.add(frontFive[i]);
             //Change connected line
             scene.remove(nodeMap[indexYear+1][j].mesh);
-            nodeMap[indexYear+1][j].mesh = (new ConnectedLine(positionX,z, nodeMap[indexYear+1][j].x, nodeMap[indexYear+1][j].z, colorMaterial)).getGeo();
+            nodeMap[indexYear+1][j].mesh = (new ConnectedLine(nodeMap[indexYear+1][j].x, nodeMap[indexYear+1][j].z, positionX,z, lineMaterial)).getGeo();
             scene.add(nodeMap[indexYear+1][j].mesh);
             break;
           }
@@ -133,7 +174,7 @@
 
     function updateUI(position){
       for(i = -5; i <= 5; i+=2){
-        verticalLine[(i+5)/2] = new VerticalLine(position, halfBandWidth * i, colorMaterial).getGeo();
+        verticalLine[(i+5)/2] = new VerticalLine(position, halfBandWidth * i, gridMaterial).getGeo();
         scene.add(verticalLine[(i+5)/2]);
       }
     }
