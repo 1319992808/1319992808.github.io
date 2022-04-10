@@ -44,18 +44,26 @@ class ConnectedLine{
         var indexX2 = parseInt(x2/2.8) + 2;
         const colors = new Float32Array([
             rankColors[indexX1].r, rankColors[indexX1].g, rankColors[indexX1].b,
-            rankColors[indexX2].r, rankColors[indexX2].g, rankColors[indexX2].b
+            rankColors[indexX1].r, rankColors[indexX1].g, rankColors[indexX1].b,
+            rankColors[indexX2].r, rankColors[indexX2].g, rankColors[indexX2].b,
+            rankColors[indexX2].r, rankColors[indexX2].g, rankColors[indexX2].b,
+
         ]);
         
         this.points = [];
-        this.points.push(new THREE.Vector3(x1, 0, z1));
-        this.points.push(new THREE.Vector3(x2, 0, z2));
+        var width = 0.04;
+        this.points.push(new THREE.Vector3(x1-width, 0, z1));
+        this.points.push(new THREE.Vector3(x1+width, 0, z1));
+        this.points.push(new THREE.Vector3(x2-width, 0, z2));
+        this.points.push(new THREE.Vector3(x2+width, 0, z2));
+
         this.geometry = new THREE.BufferGeometry().setFromPoints(this.points);
         this.geometry.addAttribute(
             'color',
             new THREE.BufferAttribute(new Float32Array(colors), 3)
         );
-        this.line = new THREE.Line(this.geometry, material);
+        this.geometry.setIndex([0, 1, 2, 1, 3, 2]);
+        this.line = new THREE.Mesh(this.geometry, material);
     }
     getGeo(){
         return this.line;

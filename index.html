@@ -42,7 +42,7 @@
     <div id="rank4">4</div>
     <div id="rank5">5</div>
   </div>
-
+  <div id = "year">1980</div>
   <div id = "audio">
     <audio autoplay controls>
       <source src="assets/Olympics.mp3">
@@ -50,7 +50,6 @@
     </audio>
   </div>
   
-
   <script>
 
     var scene = new THREE.Scene();
@@ -133,7 +132,9 @@
     camera.lookAt(0, 4, 2); //设置相机方向(指向的场景对象)
 
     //Renderer
-    var renderer = new THREE.WebGLRenderer();
+    var renderer = new THREE.WebGLRenderer({
+      antialias:true
+    });
     renderer.setSize(width, height);
     renderer.setClearColor(0x120205, 1);
     document.body.appendChild(renderer.domElement);
@@ -171,7 +172,12 @@
         scene.add(frontFive[i]);
       }
     }
-
+    window.addEventListener('resize', onWindowResize, false);
+    function onWindowResize(){
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize( window.innerWidth, window.innerHeight );
+    }
     function updateUI(position){
       for(i = -5; i <= 5; i+=2){
         verticalLine[(i+5)/2] = new VerticalLine(position, halfBandWidth * i, gridMaterial).getGeo();
