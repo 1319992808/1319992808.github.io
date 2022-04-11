@@ -69,7 +69,19 @@
     z-index:100;
     display:block;
 }
+#end{
+    position: absolute;
+    text-align: center;
+    color:#fcfbbc;
+    font-weight: 600;
+    font-size: 180%;
+    left: 40%;
+    top:40%;
+    visibility:hidden;
+    z-index: 100;
+    display:block;
 
+}
 #audio{
     position: absolute;
     top:10%;

@@ -42,8 +42,11 @@
     <div id="rank4">4</div>
     <div id="rank5">5</div>
   </div>
-  <div id = "year">1980</div>
-
+  <div id = "year">1948</div>
+  <div id = "end">
+    <div>Thank you!</div>
+    <div>Supervised by Ma Chen</div>
+  </div>
   <div id = "audio">
     <audio autoplay controls>
       <source src="assets/Olympics.mp3">
@@ -58,10 +61,11 @@
     var halfBandWidth = 1.4;
     var verticalwidth = 8.0;
     var flagLength = 1.4;
-    var startYear = 1980; 
-    var currentYear = 1980;
+    var startYear = 1948; 
+    var currentYear = 1948;
     var frequency = 0.25; // 1/4 year per second - one vertical width
     var speed = verticalwidth * frequency;
+    var isEnd = false;
     const table = new YearData();
     
     const gridMaterial = new THREE.LineBasicMaterial( { color: 0x303030 } );
@@ -74,23 +78,21 @@
     var horizontalLine = new Array(20);
     //Add Grid
     {
-      for(i = 0; i <= 20;i++){
+      for(i = 0; i <= 19;i++){
        horizontalLine[i] = (new HorizontalLine(verticalwidth * i, halfBandWidth *10, gridMaterial)).getGeo();
        scene.add(horizontalLine[i]);
       }
     }
-    
-   
     const flagMesh = new Map();
     const countries = ['SovietUnion','DDR', 'Bulgaria', 'Cuba', 'Italy', 'America', 
     'Romania', 'Germany', 'CIS', 'France', 'Austrilia', 'UK','Japan', 'China', 
-    'Canada', 'Korea', 'America', 'Russia', 'ROT'];
+    'Canada', 'Korea', 'America', 'Russia', 'ROT', 'Sweden', 'Hangary', 'EUA'];
     countries.forEach(function(countryName){
       flagMesh.set(countryName, new CountryFlag(countryName));
     });
     var nodeMap = new Array();
-    for(i = 1980; i <= 2020; i+=4){
-      var indexYear = (i - 1980)/4;
+    for(i = startYear; i <= 2020; i+=4){
+      var indexYear = (i - startYear)/4;
       nodeMap[indexYear] = new Array(5);
       for(j = 1; j <= 5; ++j){
         nodeMap[indexYear][j-1] = new PathNode(j, i, table.getYearRank(i, j));
@@ -98,7 +100,7 @@
     }
 
     //Static mesh
-    for(i = 0; i <= 10; i++){
+    for(i = 0; i <= (2020-startYear)/4; i++){
       for(j = 0;j < 5;j++){
         var node = nodeMap[i][j];
         var isReign = false;
@@ -128,7 +130,7 @@
     var height = window.innerHeight;
     var k = width / height;
     //Camera
-    var camera = new THREE.PerspectiveCamera(50, k, 1, 100);
+    var camera = new THREE.PerspectiveCamera(50, k, 1, 50);
     camera.position.set(0, 6, -15); //设置相机位置
     camera.lookAt(0, 4, 2); //设置相机方向(指向的场景对象)
 
@@ -145,7 +147,11 @@
       //Front Five
       var lerpWeight = Math.min((z % verticalwidth) / 7.0, 1.0);
       var indexYear = parseInt(z / verticalwidth);
-      document.getElementById("year").textContent = startYear + indexYear * 4;
+      var year =  startYear + indexYear * 4;
+      if(year >= 2020){
+        isEnd = true;
+      }
+      document.getElementById("year").textContent = year;
       for(i = 0; i < 5;i++){
         var node = nodeMap[indexYear][i];
         node.mesh.visible = false;
@@ -153,7 +159,7 @@
         var isReign = false;
         var positionX;
         for(j = 0; j < 5; j++){
-          if(node.country == nodeMap[indexYear+1][j].country){
+          if(!isEnd && node.country == nodeMap[indexYear+1][j].country){
             isReign = true;
             frontFive[i] = flagMesh.get(node.country).createMesh();
             positionX = (1 - lerpWeight) * node.x + lerpWeight *  nodeMap[indexYear+1][j].x;
@@ -186,12 +192,21 @@
         scene.add(verticalLine[(i+5)/2]);
       }
     }
+    function showEndScene(){
+      document.getElementById("rank").style.visibility = "hidden";
+      document.getElementById("year").style.visibility = "hidden";
+      document.getElementById("end").style.visibility = "visible";
+    }
+
     var update = function(){
-      camera.position.z += speed * clock.getDelta();
-      camera.lookAt(0, 2, camera.position.z + 17);
-      updateFrontFive(camera.position.z + 15);
-      updateUI(camera.position.z + 15);
-      
+      if(!isEnd){
+        camera.position.z += speed * clock.getDelta();
+        camera.lookAt(0, 2, camera.position.z + 17);
+        updateFrontFive(camera.position.z + 15);
+        updateUI(camera.position.z + 15);
+      }else{
+        showEndScene();
+      }
     };
 
     var render = function(){

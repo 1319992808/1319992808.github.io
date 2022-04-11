@@ -91,7 +91,7 @@ class PathNode{
         //World Position
         this.x = 2 * (3 - rank) * 1.4; //half band width 1.4
         this.y = 0.7;
-        this.z = (year - 1980)/4 * 8.0; // vertical length 8.0
+        this.z = (year - 1948)/4 * 8.0; // vertical length 8.0
 
         this.mesh;
     }
@@ -100,6 +100,15 @@ class PathNode{
 class YearData{
     constructor(){
         this.rawData = [
+            
+            "America","Sweden",  "France", "Hangary", "Italy", //1948
+            "America","SovietUnion",  "Hangary", "Sweden", "Italy", //1952
+            "SovietUnion","America",  "Austrilia", "Hangary", "Italy", //1956
+            "SovietUnion","America",  "Italy", "Germany", "Austrilia", //1960
+            "America", "SovietUnion", "Japan", "EUA", "Italy", //1964
+            "America", "SovietUnion", "Japan", "Hangary", "Germany", //1968
+            "SovietUnion", "America", "DDR", "Germany", "Japan", //1972
+            "SovietUnion", "DDR", "America", "Germany", "Japan", //1976
             "SovietUnion", "DDR", "Bulgaria", "Cuba", "Italy", //1980
             "America", "Romania", "Germany", "China", "Italy",  //1984
             "SovietUnion", "DDR", "America", "Korea", "Germany",  //1988
@@ -114,7 +123,7 @@ class YearData{
         ];
         this.rankCount = 5;
         this.yearCount = this.rawData.length / this.rankCount;
-        this.startYear = 1980;
+        this.startYear = 1948;
         this.yearFreq = 4;
     }
     getYearRank(year, rank){
