@@ -75,8 +75,8 @@
     color:#fcfbbc;
     font-weight: 600;
     font-size: 180%;
-    left: 40%;
-    top:40%;
+    left: 38%;
+    top:30%;
     visibility:hidden;
     z-index: 100;
     display:block;
@@ -84,8 +84,18 @@
 }
 #audio{
     position: absolute;
-    top:10%;
-    right:10%;
+    top:0%;
+    right:0%;
     z-index:100;
 }
 
+#title{
+    position: absolute;
+    text-align: center;
+    color:#e3fcbcbd;
+    font-weight: 500;
+    font-size: 300%;
+    font-family:'Courier New', Courier, monospace;
+    left: 27%;
+    top: 16%
+}
